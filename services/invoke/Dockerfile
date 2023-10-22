@@ -51,6 +51,10 @@ RUN --mount=type=cache,target=/root/.cache/pip \
   pip install torchmetrics==0.11.4
 
 RUN --mount=type=cache,target=/root/.cache/pip \
+  pip uninstall -y Werkzeug && \
+  pip install Werkzeug==2.3.6
+
+RUN --mount=type=cache,target=/root/.cache/pip \
   --mount=type=bind,from=xformers,source=/wheel.whl,target=/xformers-0.0.21-cp310-cp310-linux_x86_64.whl \
   pip install -U opencv-python-headless triton /xformers-0.0.21-cp310-cp310-linux_x86_64.whl && \
   python3 -c "from patchmatch import patch_match"
