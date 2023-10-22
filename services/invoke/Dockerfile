@@ -17,6 +17,18 @@ RUN --mount=type=cache,target=/var/cache/apt \
   ln -sf opencv4.pc opencv.pc
 
 
+RUN apt-get update && apt-get install -y gnupg2 && \
+  apt-get install -y software-properties-common && \
+  apt-get install -y wget && \
+  rm -rf /var/lib/apt/lists/* && \
+  wget https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-wsl-ubuntu.pin && \
+  mv cuda-wsl-ubuntu.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
+  apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/3bf863cc.pub && \
+  add-apt-repository 'deb https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/ /' && \
+  apt-get update && \
+  apt-get -y install cuda
+
+
 ENV ROOT=/InvokeAI
 RUN git clone https://github.com/invoke-ai/InvokeAI.git ${ROOT}
 WORKDIR ${ROOT}
@@ -33,6 +45,10 @@ RUN --mount=type=cache,target=/root/.cache/pip \
   git checkout ${BRANCH} && \
   git reset --hard ${SHA} && \
   pip install -U -e .
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+  pip uninstall -y torchmetrics && \
+  pip install torchmetrics==0.11.4
 
 RUN --mount=type=cache,target=/root/.cache/pip \
   --mount=type=bind,from=xformers,source=/wheel.whl,target=/xformers-0.0.21-cp310-cp310-linux_x86_64.whl \
